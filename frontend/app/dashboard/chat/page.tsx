@@ -3,7 +3,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 
-interface Message { id: string; role: 'USER' | 'ASSISTANT'; content: string; createdAt: Date }
+interface Message {
+  id: string; role: 'USER' | 'ASSISTANT'; content: string; createdAt: Date
+  metadata?: { model?: string; provider?: string; usage?: { total_tokens?: number } }
+}
 
 const AGENT_MAP: Record<string, { name: string; color: string; icon: string }> = {
   JUDGE:      { name: 'JusticeAI',    color: 'from-blue-500 to-cyan-500',    icon: '⚖️' },
