@@ -7,6 +7,7 @@ interface Case {
   id: string; caseNumber: string; caseType: string; status: string
   title: string; description?: string; filingDate: string
   nextHearingDate?: string; priority?: string
+  metadata?: { priority?: string; acts?: string[]; keywords?: string[]; complexity?: string }
 }
 
 const STATUS_STYLE: Record<string, string> = {
