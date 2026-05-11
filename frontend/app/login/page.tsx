@@ -22,17 +22,41 @@ export default function LoginPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
+
+    // Mock auth - works without backend
+    const mockUsers: Record<string, any> = {
+      'judge.sharma@court.gov.in':   { id: '1', name: 'Justice Rajesh Sharma',  role: 'JUDGE',      email: 'judge.sharma@court.gov.in' },
+      'adv.mehta@lawfirm.com':       { id: '2', name: 'Adv. Priya Mehta',       role: 'LAWYER',     email: 'adv.mehta@lawfirm.com' },
+      'clerk.kumar@court.gov.in':    { id: '3', name: 'Ramesh Kumar',            role: 'CLERK',      email: 'clerk.kumar@court.gov.in' },
+      'pp.singh@gov.in':             { id: '4', name: 'PP Vikram Singh',         role: 'PROSECUTOR', email: 'pp.singh@gov.in' },
+    }
+
     try {
+      // Try real backend first
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error?.message || 'Login failed')
-      localStorage.setItem('token', data.data.token)
-      localStorage.setItem('user', JSON.stringify(data.data.user))
-      router.push('/dashboard')
+      }).catch(() => null)
+
+      if (res && res.ok) {
+        const data = await res.json()
+        localStorage.setItem('token', data.data.token)
+        localStorage.setItem('user', JSON.stringify(data.data.user))
+        router.push('/dashboard')
+        return
+      }
+
+      // Fallback: mock login
+      const mockUser = mockUsers[email.toLowerCase()]
+      if (mockUser && password === 'Demo@123') {
+        localStorage.setItem('token', 'mock-token-' + mockUser.id)
+        localStorage.setItem('user', JSON.stringify(mockUser))
+        router.push('/dashboard')
+        return
+      }
+
+      throw new Error('Invalid email or password. Use Demo@123 for demo accounts.')
     } catch (err: any) {
       setError(err.message)
     } finally {
