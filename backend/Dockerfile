@@ -2,19 +2,31 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-COPY ../shared/package*.json ../shared/
+# Copy shared package files
+COPY shared/package*.json ./shared/
+COPY shared/tsconfig.json ./shared/
 
-# Install dependencies
+# Copy backend package files
+COPY backend/package*.json ./backend/
+
+# Install shared dependencies and build
+WORKDIR /app/shared
+COPY shared/src ./src
+RUN npm install
+RUN npm run build
+
+# Install backend dependencies
+WORKDIR /app/backend
+COPY backend/src ./src
+COPY backend/tsconfig.json ./
 RUN npm install
 
-# Copy source code
-COPY . .
-
-# Build TypeScript
+# Build backend TypeScript
 RUN npm run build
+
+# Create data directory for SQLite
+RUN mkdir -p ./data
 
 EXPOSE 5000
 
-CMD ["npm", "run", "dev"]
+CMD ["node", "dist/index.js"]
